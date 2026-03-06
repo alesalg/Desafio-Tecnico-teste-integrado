@@ -1,0 +1,144 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Transferencia</h1>
+    <p class="subtitle">Transfira valores entre beneficios</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    {{ successMessage }}
+  </div>
+
+  <div class="card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- Origem -->
+      <div class="form-group">
+        <label for="fromId">Origem <span class="required">*</span></label>
+        <select
+          id="fromId"
+          formControlName="fromId"
+          class="input"
+          (change)="onFromChange()"
+        >
+          <option value="">Selecione o beneficio de origem</option>
+          <option *ngFor="let beneficio of beneficios" [value]="beneficio.id">
+            {{ beneficio.nome }} - {{ formatarValor(beneficio.valor) }}
+          </option>
+        </select>
+      </div>
+
+      <div *ngIf="fromBeneficio" class="info-card">
+        <div class="info-label">Saldo disponivel</div>
+        <div class="info-value">{{ formatarValor(fromBeneficio.valor) }}</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="transfer-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      </div>
+
+      <!-- Destino -->
+      <div class="form-group">
+        <label for="toId">Destino <span class="required">*</span></label>
+        <select
+          id="toId"
+          formControlName="toId"
+          class="input"
+          (change)="onToChange()"
+        >
+          <option value="">Selecione o beneficio de destino</option>
+          <option *ngFor="let beneficio of beneficios" [value]="beneficio.id">
+            {{ beneficio.nome }} - {{ formatarValor(beneficio.valor) }}
+          </option>
+        </select>
+      </div>
+
+      <div *ngIf="toBeneficio" class="info-card">
+        <div class="info-label">Saldo atual</div>
+        <div class="info-value">{{ formatarValor(toBeneficio.valor) }}</div>
+      </div>
+
+      <!-- Alerta IDs iguais -->
+      <div *ngIf="idsIguais()" class="alert alert-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Origem e destino nao podem ser iguais!
+      </div>
+
+      <!-- Valor -->
+      <div class="form-group">
+        <label for="valor">Valor a transferir <span class="required">*</span></label>
+        <div class="input-prefix-wrapper">
+          <span class="input-prefix">R$</span>
+          <input
+            type="number"
+            id="valor"
+            formControlName="valor"
+            class="input input-with-prefix"
+            step="0.01"
+            min="0.01"
+            placeholder="0,00"
+          />
+        </div>
+      </div>
+
+      <div *ngIf="valorExcedeSaldo()" class="alert alert-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Valor excede o saldo disponivel!
+      </div>
+
+      <!-- Resumo -->
+      <div *ngIf="fromBeneficio && toBeneficio && form.get('valor')?.value" class="resumo-card">
+        <h3 class="resumo-title">Resumo</h3>
+        <div class="resumo-rows">
+          <div class="resumo-row">
+            <span>De</span>
+            <strong>{{ fromBeneficio.nome }}</strong>
+          </div>
+          <div class="resumo-row">
+            <span>Para</span>
+            <strong>{{ toBeneficio.nome }}</strong>
+          </div>
+          <div class="resumo-row resumo-highlight">
+            <span>Valor</span>
+            <strong>{{ formatarValor(form.get('valor')?.value) }}</strong>
+          </div>
+          <div class="resumo-divider"></div>
+          <div class="resumo-row">
+            <span>Novo saldo origem</span>
+            <strong>{{ formatarValor(fromBeneficio.valor - form.get('valor')?.value) }}</strong>
+          </div>
+          <div class="resumo-row">
+            <span>Novo saldo destino</span>
+            <strong>{{ formatarValor(toBeneficio.valor + form.get('valor')?.value) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-ghost"
+          (click)="cancel()"
+          [disabled]="loading"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-success"
+          [disabled]="!form.valid || loading || idsIguais() || valorExcedeSaldo()"
+        >
+          <div *ngIf="loading" class="spinner-sm"></div>
+          {{ loading ? 'Transferindo...' : 'Confirmar Transferencia' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
