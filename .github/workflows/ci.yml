@@ -3,7 +3,8 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  backend:
+    name: Backend Build & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -12,5 +13,26 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build all modules
+      - name: Build and test backend
         run: mvn -B clean package
+
+  frontend:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+      - name: Run tests
+        working-directory: frontend
+        run: npm test -- --watch=false --browsers=ChromeHeadless
