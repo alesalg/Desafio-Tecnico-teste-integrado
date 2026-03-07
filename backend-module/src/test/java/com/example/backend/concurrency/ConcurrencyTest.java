@@ -1,6 +1,7 @@
 package com.example.backend.concurrency;
 
 import com.example.backend.dto.TransferenciaRequest;
+import com.example.backend.exception.BusinessException;
 import com.example.backend.model.Beneficio;
 import com.example.backend.repository.BeneficioRepository;
 import com.example.backend.service.BeneficioService;
@@ -141,6 +142,7 @@ class ConcurrencyTest {
         CountDownLatch latch = new CountDownLatch(numThreads);
         AtomicInteger sucessos = new AtomicInteger(0);
         AtomicInteger falhasSaldoInsuficiente = new AtomicInteger(0);
+        AtomicInteger outrasExcecoes = new AtomicInteger(0);
 
         for (int i = 0; i < numThreads; i++) {
             executor.submit(() -> {
@@ -156,9 +158,15 @@ class ConcurrencyTest {
 
                     service.transferir(request);
                     sucessos.incrementAndGet();
+                    System.out.println("Thread " + Thread.currentThread().getName() + " - Sucesso");
                 } catch (Exception e) {
-                    if (e.getMessage().contains("Saldo insuficiente")) {
+                    System.out.println("Thread " + Thread.currentThread().getName() + 
+                        " - Exceção: " + e.getClass().getSimpleName() + 
+                        " - Mensagem: " + e.getMessage());
+                    if (e.getMessage() != null && e.getMessage().contains("Saldo insuficiente")) {
                         falhasSaldoInsuficiente.incrementAndGet();
+                    } else {
+                        outrasExcecoes.incrementAndGet();
                     }
                 }
             });
@@ -182,6 +190,8 @@ class ConcurrencyTest {
         System.out.println("=== TESTE DE RACE CONDITION ===");
         System.out.println("Sucessos: " + sucessos.get());
         System.out.println("Falhas por saldo insuficiente: " + falhasSaldoInsuficiente.get());
+        System.out.println("Outras exceções: " + outrasExcecoes.get());
+        System.out.println("Total de operações: " + (sucessos.get() + falhasSaldoInsuficiente.get() + outrasExcecoes.get()));
         System.out.println("Saldo origem final: " + origemFinal.getValor());
         System.out.println("Saldo destino final: " + destinoFinal.getValor());
     }
