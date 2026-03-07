@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { BenefitListComponent } from './benefit-list.component';
 import { BenefitService } from '../../services/benefit.service';
@@ -10,16 +11,19 @@ describe('BenefitListComponent', () => {
   let fixture: ComponentFixture<BenefitListComponent>;
   let mockBenefitService: jasmine.SpyObj<BenefitService>;
   let mockRouter: jasmine.SpyObj<Router>;
+  let mockDialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(async () => {
     mockBenefitService = jasmine.createSpyObj('BenefitService', ['getAll', 'getAllActive', 'delete']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
       declarations: [BenefitListComponent],
       providers: [
         { provide: BenefitService, useValue: mockBenefitService },
-        { provide: Router, useValue: mockRouter }
+        { provide: Router, useValue: mockRouter },
+        { provide: MatDialog, useValue: mockDialog }
       ]
     }).compileComponents();
 
@@ -53,7 +57,7 @@ describe('BenefitListComponent', () => {
 
     mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
 
-    component.showApenasAtivos = true;
+    component.showOnlyActive = true;
     component.loadBenefits();
 
     expect(mockBenefitService.getAllActive).toHaveBeenCalled();
@@ -84,22 +88,22 @@ describe('BenefitListComponent', () => {
 
     fixture.detectChanges();
 
-    expect(component.showApenasAtivos).toBe(false);
+    expect(component.showOnlyActive).toBe(false);
     expect(component.benefits.length).toBe(2);
 
-    component.toggleApenasAtivos();
+    component.toggleOnlyActive();
 
-    expect(component.showApenasAtivos).toBe(true);
+    expect(component.showOnlyActive).toBe(true);
     expect(mockBenefitService.getAllActive).toHaveBeenCalled();
   });
 
   it('should navigate to create form', () => {
-    component.criar();
+    component.create();
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios/novo']);
   });
 
   it('should navigate to edit form', () => {
-    component.editar(1);
+    component.edit(1);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios/editar', 1]);
   });
 
@@ -115,38 +119,40 @@ describe('BenefitListComponent', () => {
 
     mockBenefitService.getAll.and.returnValue(of(mockBenefits));
     mockBenefitService.delete.and.returnValue(of(undefined));
-    spyOn(window, 'confirm').and.returnValue(true);
-    spyOn(window, 'alert');
+    
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(true) });
+    mockDialog.open.and.returnValue(dialogRefSpy);
 
     fixture.detectChanges();
 
-    component.deletar(1, 'Beneficio 1');
+    component.delete(1, 'Beneficio 1');
 
-    expect(window.confirm).toHaveBeenCalledWith('Tem certeza que deseja deletar o benefício "Beneficio 1"?');
+    expect(mockDialog.open).toHaveBeenCalled();
     expect(mockBenefitService.delete).toHaveBeenCalledWith(1);
-    expect(window.alert).toHaveBeenCalledWith('Benefício deletado com sucesso!');
   });
 
   it('should not delete beneficio when cancelled', () => {
-    spyOn(window, 'confirm').and.returnValue(false);
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(false) });
+    mockDialog.open.and.returnValue(dialogRefSpy);
 
-    component.deletar(1, 'Beneficio 1');
+    component.delete(1, 'Beneficio 1');
 
     expect(mockBenefitService.delete).not.toHaveBeenCalled();
   });
 
   it('should handle error when deleting', () => {
     mockBenefitService.delete.and.returnValue(throwError(() => new Error('Erro ao deletar')));
-    spyOn(window, 'confirm').and.returnValue(true);
-    spyOn(window, 'alert');
+    
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(true) });
+    mockDialog.open.and.returnValue(dialogRefSpy);
 
-    component.deletar(1, 'Beneficio 1');
+    component.delete(1, 'Beneficio 1');
 
-    expect(window.alert).toHaveBeenCalledWith('Erro ao deletar: Erro ao deletar');
+    expect(mockDialog.open).toHaveBeenCalled();
   });
 
   it('should format valor correctly', () => {
-    const formatted = component.formatarValor(1234.56);
+    const formatted = component.formatValue(1234.56);
     expect(formatted).toContain('1.234,56');
   });
 
@@ -154,6 +160,6 @@ describe('BenefitListComponent', () => {
     expect(component.benefits).toEqual([]);
     expect(component.loading).toBe(false);
     expect(component.errorMessage).toBe('');
-    expect(component.showApenasAtivos).toBe(false);
+    expect(component.showOnlyActive).toBe(false);
   });
 });

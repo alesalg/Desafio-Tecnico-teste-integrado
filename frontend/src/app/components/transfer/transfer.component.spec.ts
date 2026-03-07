@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { TransferComponent } from './transfer.component';
 import { BenefitService } from '../../services/benefit.service';
@@ -11,17 +12,20 @@ describe('TransferComponent', () => {
   let fixture: ComponentFixture<TransferComponent>;
   let mockBenefitService: jasmine.SpyObj<BenefitService>;
   let mockRouter: jasmine.SpyObj<Router>;
+  let mockDialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(async () => {
     mockBenefitService = jasmine.createSpyObj('BenefitService', ['getAllActive', 'transfer']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
       declarations: [TransferComponent],
       imports: [ReactiveFormsModule],
       providers: [
         { provide: BenefitService, useValue: mockBenefitService },
-        { provide: Router, useValue: mockRouter }
+        { provide: Router, useValue: mockRouter },
+        { provide: MatDialog, useValue: mockDialog }
       ]
     }).compileComponents();
 
@@ -124,7 +128,7 @@ describe('TransferComponent', () => {
   });
 
   it('should perform transfer successfully', fakeAsync(() => {
-    const mockResponse: TransferResponse = {
+const mockResponse: TransferResponse = {
       fromId: 1,
       fromNome: 'Beneficio 1',
       fromNovoSaldo: 50,
@@ -143,6 +147,9 @@ describe('TransferComponent', () => {
 
     mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
     mockBenefitService.transfer.and.returnValue(of(mockResponse));
+    
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(true) });
+    mockDialog.open.and.returnValue(dialogRefSpy);
 
     fixture.detectChanges();
 
@@ -159,10 +166,10 @@ describe('TransferComponent', () => {
       toId: 2,
       valor: 50
     });
-    expect(component.successMessage).toBe('Transferência realizada com sucesso');
+    expect(mockDialog.open).toHaveBeenCalled();
     expect(component.loading).toBe(false);
 
-    tick(2000);
+    tick();
 
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios']);
   }));
@@ -186,7 +193,7 @@ describe('TransferComponent', () => {
 
     component.onSubmit();
 
-    expect(component.errorMessage).toBe('Erro na transferência');
+    expect(mockDialog.open).toHaveBeenCalled();
     expect(component.loading).toBe(false);
   });
 
@@ -200,7 +207,7 @@ describe('TransferComponent', () => {
   });
 
   it('should cancel and navigate back', () => {
-    mockBeneficioService.getAllAtivos.and.returnValue(of([]));
+    mockBenefitService.getAllActive.and.returnValue(of([]));
     fixture.detectChanges();
 
     component.cancel();
@@ -209,12 +216,12 @@ describe('TransferComponent', () => {
   });
 
   it('should format valor correctly', () => {
-    const formatted = component.formatarValor(1234.56);
+    const formatted = component.formatValue(1234.56);
     expect(formatted).toContain('1.234,56');
   });
 
   it('should detect when IDs are equal', () => {
-    mockBeneficioService.getAllAtivos.and.returnValue(of([]));
+    mockBenefitService.getAllActive.and.returnValue(of([]));
     fixture.detectChanges();
 
     component.form.patchValue({
@@ -222,40 +229,40 @@ describe('TransferComponent', () => {
       toId: '1'
     });
 
-    expect(component.idsIguais()).toBe(true);
+    expect(component.sameIds()).toBe(true);
 
     component.form.patchValue({
       fromId: '1',
       toId: '2'
     });
 
-    expect(component.idsIguais()).toBe(false);
+    expect(component.sameIds()).toBe(false);
   });
 
   it('should detect when valor exceeds saldo', () => {
-    const mockBeneficios: Beneficio[] = [
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of(mockBeneficios));
+    mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
     fixture.detectChanges();
 
     component.form.get('fromId')?.setValue('1');
     component.onFromChange();
 
     component.form.get('valor')?.setValue(150);
-    expect(component.valorExcedeSaldo()).toBe(true);
+    expect(component.valueExceedsBalance()).toBe(true);
 
     component.form.get('valor')?.setValue(50);
-    expect(component.valorExcedeSaldo()).toBe(false);
+    expect(component.valueExceedsBalance()).toBe(false);
   });
 
   it('should initialize with correct default values', () => {
-    expect(component.beneficios).toEqual([]);
+    expect(component.benefits).toEqual([]);
     expect(component.loading).toBe(false);
     expect(component.errorMessage).toBe('');
     expect(component.successMessage).toBe('');
-    expect(component.fromBeneficio).toBeUndefined();
-    expect(component.toBeneficio).toBeUndefined();
+    expect(component.fromBenefit).toBeUndefined();
+    expect(component.toBenefit).toBeUndefined();
   });
 });

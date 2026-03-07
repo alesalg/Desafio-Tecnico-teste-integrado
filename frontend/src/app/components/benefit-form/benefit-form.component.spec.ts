@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { BenefitFormComponent } from './benefit-form.component';
 import { BenefitService } from '../../services/benefit.service';
@@ -11,11 +12,13 @@ describe('BenefitFormComponent', () => {
   let fixture: ComponentFixture<BenefitFormComponent>;
   let mockBenefitService: jasmine.SpyObj<BenefitService>;
   let mockRouter: jasmine.SpyObj<Router>;
+  let mockDialog: jasmine.SpyObj<MatDialog>;
   let mockActivatedRoute: any;
 
   beforeEach(async () => {
     mockBenefitService = jasmine.createSpyObj('BenefitService', ['getById', 'create', 'update']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockActivatedRoute = {
       snapshot: {
         paramMap: {
@@ -30,6 +33,7 @@ describe('BenefitFormComponent', () => {
       providers: [
         { provide: BenefitService, useValue: mockBenefitService },
         { provide: Router, useValue: mockRouter },
+        { provide: MatDialog, useValue: mockDialog },
         { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
@@ -120,7 +124,8 @@ describe('BenefitFormComponent', () => {
     };
 
     mockBenefitService.create.and.returnValue(of(mockResponse));
-    spyOn(window, 'alert');
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(true) });
+    mockDialog.open.and.returnValue(dialogRefSpy);
 
     fixture.detectChanges();
 
@@ -134,7 +139,7 @@ describe('BenefitFormComponent', () => {
     component.onSubmit();
 
     expect(mockBenefitService.create).toHaveBeenCalled();
-    expect(window.alert).toHaveBeenCalledWith('Benefício criado com sucesso!');
+    expect(mockDialog.open).toHaveBeenCalled();
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios']);
   });
 
@@ -149,7 +154,8 @@ describe('BenefitFormComponent', () => {
     };
 
     mockBenefitService.update.and.returnValue(of(mockResponse));
-    spyOn(window, 'alert');
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(true) });
+    mockDialog.open.and.returnValue(dialogRefSpy);
 
     fixture.detectChanges();
 
@@ -166,7 +172,7 @@ describe('BenefitFormComponent', () => {
     component.onSubmit();
 
     expect(mockBenefitService.update).toHaveBeenCalledWith(1, jasmine.any(Object));
-    expect(window.alert).toHaveBeenCalledWith('Benefício atualizado com sucesso!');
+    expect(mockDialog.open).toHaveBeenCalled();
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios']);
   });
 

@@ -182,7 +182,7 @@ describe('BenefitService', () => {
         expect(response.valorTransferido).toBe(50);
       });
 
-      const req = httpMock.expectOne(`${API_URL}/transfer`);
+      const req = httpMock.expectOne(`${API_URL}/transferir`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(request);
       req.flush(mockResponse);
