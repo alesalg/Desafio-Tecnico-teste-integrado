@@ -99,7 +99,7 @@ class ConcurrencyTest {
         assertThat(origemFinal.getValor()).isEqualByComparingTo("0.00");
 
         BigDecimal somaDestinos = destino1Final.getValor().add(destino2Final.getValor());
-        assertThat(somaDestinos).isEqualByComparingTo("10000.00");
+        assertThat(somaDestinos).isEqualByComparingTo("10002.00"); // 2.00 inicial + 10000.00 transferido
 
         assertThat(sucessos.get()).isEqualTo(10);
         assertThat(falhas.get()).isEqualTo(0);
@@ -173,7 +173,7 @@ class ConcurrencyTest {
 
         assertThat(origemFinal.getValor()).isEqualByComparingTo("0.00");
 
-        assertThat(destinoFinal.getValor()).isEqualByComparingTo("3000.00");
+        assertThat(destinoFinal.getValor()).isEqualByComparingTo("3001.00"); // 1.00 inicial + 3000.00 transferido
 
         System.out.println("=== TESTE DE RACE CONDITION ===");
         System.out.println("Sucessos: " + sucessos.get());
