@@ -2,33 +2,33 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { TransferenciaComponent } from './transferencia.component';
-import { BeneficioService } from '../../services/beneficio.service';
-import { Beneficio, TransferenciaResponse } from '../../models/beneficio.model';
+import { TransferComponent } from './transfer.component';
+import { BenefitService } from '../../services/benefit.service';
+import { Benefit, TransferResponse } from '../../models/benefit.model';
 
-describe('TransferenciaComponent', () => {
-  let component: TransferenciaComponent;
-  let fixture: ComponentFixture<TransferenciaComponent>;
-  let mockBeneficioService: jasmine.SpyObj<BeneficioService>;
+describe('TransferComponent', () => {
+  let component: TransferComponent;
+  let fixture: ComponentFixture<TransferComponent>;
+  let mockBenefitService: jasmine.SpyObj<BenefitService>;
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    mockBeneficioService = jasmine.createSpyObj('BeneficioService', ['getAllAtivos', 'transferir']);
+    mockBenefitService = jasmine.createSpyObj('BenefitService', ['getAllActive', 'transfer']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      declarations: [TransferenciaComponent],
+      declarations: [TransferComponent],
       imports: [ReactiveFormsModule],
       providers: [
-        { provide: BeneficioService, useValue: mockBeneficioService },
+        { provide: BenefitService, useValue: mockBenefitService },
         { provide: Router, useValue: mockRouter }
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TransferenciaComponent);
+    fixture = TestBed.createComponent(TransferComponent);
     component = fixture.componentInstance;
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of([]));
+    mockBenefitService.getAllActive.and.returnValue(of([]));
   });
 
   it('should create', () => {
@@ -36,7 +36,7 @@ describe('TransferenciaComponent', () => {
   });
 
   it('should initialize form with empty values', () => {
-    mockBeneficioService.getAllAtivos.and.returnValue(of([]));
+    mockBenefitService.getAllActive.and.returnValue(of([]));
     fixture.detectChanges();
     expect(component.form).toBeDefined();
     expect(component.form.get('fromId')?.value).toBe('');
@@ -45,21 +45,21 @@ describe('TransferenciaComponent', () => {
   });
 
   it('should load active beneficios on init', () => {
-    const mockBeneficios: Beneficio[] = [
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 },
       { id: 2, nome: 'Beneficio 2', descricao: 'Desc 2', valor: 200, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of(mockBeneficios));
+    mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
 
     fixture.detectChanges();
 
-    expect(mockBeneficioService.getAllAtivos).toHaveBeenCalled();
-    expect(component.beneficios).toEqual(mockBeneficios);
+    expect(mockBenefitService.getAllActive).toHaveBeenCalled();
+    expect(component.benefits).toEqual(mockBenefits);
   });
 
   it('should handle error when loading beneficios', () => {
-    mockBeneficioService.getAllAtivos.and.returnValue(throwError(() => new Error('Erro ao carregar')));
+    mockBenefitService.getAllActive.and.returnValue(throwError(() => new Error('Erro ao carregar')));
 
     fixture.detectChanges();
 
@@ -67,7 +67,7 @@ describe('TransferenciaComponent', () => {
   });
 
   it('should validate required fields', () => {
-    mockBeneficioService.getAllAtivos.and.returnValue(of([]));
+    mockBenefitService.getAllActive.and.returnValue(of([]));
     fixture.detectChanges();
     
     expect(component.form.valid).toBeFalsy();
@@ -82,7 +82,7 @@ describe('TransferenciaComponent', () => {
   });
 
   it('should validate minimum value', () => {
-    mockBeneficioService.getAllAtivos.and.returnValue(of([]));
+    mockBenefitService.getAllActive.and.returnValue(of([]));
     fixture.detectChanges();
     const valorControl = component.form.get('valor');
 
@@ -93,38 +93,38 @@ describe('TransferenciaComponent', () => {
     expect(valorControl?.hasError('min')).toBeFalsy();
   });
 
-  it('should update fromBeneficio on selection change', () => {
-    const mockBeneficios: Beneficio[] = [
+  it('should update fromBenefit on selection change', () => {
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 },
       { id: 2, nome: 'Beneficio 2', descricao: 'Desc 2', valor: 200, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of(mockBeneficios));
+    mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
     fixture.detectChanges();
 
     component.form.get('fromId')?.setValue('1');
     component.onFromChange();
 
-    expect(component.fromBeneficio).toEqual(mockBeneficios[0]);
+    expect(component.fromBenefit).toEqual(mockBenefits[0]);
   });
 
-  it('should update toBeneficio on selection change', () => {
-    const mockBeneficios: Beneficio[] = [
+  it('should update toBenefit on selection change', () => {
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 },
       { id: 2, nome: 'Beneficio 2', descricao: 'Desc 2', valor: 200, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of(mockBeneficios));
+    mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
     fixture.detectChanges();
 
     component.form.get('toId')?.setValue('2');
     component.onToChange();
 
-    expect(component.toBeneficio).toEqual(mockBeneficios[1]);
+    expect(component.toBenefit).toEqual(mockBenefits[1]);
   });
 
   it('should perform transfer successfully', fakeAsync(() => {
-    const mockResponse: TransferenciaResponse = {
+    const mockResponse: TransferResponse = {
       fromId: 1,
       fromNome: 'Beneficio 1',
       fromNovoSaldo: 50,
@@ -136,13 +136,13 @@ describe('TransferenciaComponent', () => {
       mensagem: 'Transferência realizada com sucesso'
     };
 
-    const mockBeneficios: Beneficio[] = [
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 },
       { id: 2, nome: 'Beneficio 2', descricao: 'Desc 2', valor: 200, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of(mockBeneficios));
-    mockBeneficioService.transferir.and.returnValue(of(mockResponse));
+    mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
+    mockBenefitService.transfer.and.returnValue(of(mockResponse));
 
     fixture.detectChanges();
 
@@ -154,7 +154,7 @@ describe('TransferenciaComponent', () => {
 
     component.onSubmit();
 
-    expect(mockBeneficioService.transferir).toHaveBeenCalledWith({
+    expect(mockBenefitService.transfer).toHaveBeenCalledWith({
       fromId: 1,
       toId: 2,
       valor: 50
@@ -168,13 +168,13 @@ describe('TransferenciaComponent', () => {
   }));
 
   it('should handle error on transfer', () => {
-    const mockBeneficios: Beneficio[] = [
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 },
       { id: 2, nome: 'Beneficio 2', descricao: 'Desc 2', valor: 200, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of(mockBeneficios));
-    mockBeneficioService.transferir.and.returnValue(throwError(() => new Error('Erro na transferência')));
+    mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
+    mockBenefitService.transfer.and.returnValue(throwError(() => new Error('Erro na transferência')));
 
     fixture.detectChanges();
 
@@ -191,12 +191,12 @@ describe('TransferenciaComponent', () => {
   });
 
   it('should not submit invalid form', () => {
-    mockBeneficioService.getAllAtivos.and.returnValue(of([]));
+    mockBenefitService.getAllActive.and.returnValue(of([]));
     fixture.detectChanges();
 
     component.onSubmit();
 
-    expect(mockBeneficioService.transferir).not.toHaveBeenCalled();
+    expect(mockBenefitService.transfer).not.toHaveBeenCalled();
   });
 
   it('should cancel and navigate back', () => {

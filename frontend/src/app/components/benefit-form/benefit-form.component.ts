@@ -1,35 +1,38 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BeneficioService } from '../../services/beneficio.service';
+import { MatDialog } from '@angular/material/dialog';
+import { BenefitService } from '../../services/benefit.service';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
-  selector: 'app-beneficio-form',
-  templateUrl: './beneficio-form.component.html',
-  styleUrls: ['./beneficio-form.component.scss']
+  selector: 'app-benefit-form',
+  templateUrl: './benefit-form.component.html',
+  styleUrls: ['./benefit-form.component.scss']
 })
-export class BeneficioFormComponent implements OnInit {
+export class BenefitFormComponent implements OnInit {
   
   form!: FormGroup;
   isEditMode = false;
-  beneficioId?: number;
+  benefitId?: number;
   loading = false;
   errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
-    private beneficioService: BeneficioService,
+    private benefitService: BenefitService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
     this.initForm();
     
-    this.beneficioId = Number(this.route.snapshot.paramMap.get('id'));
-    if (this.beneficioId) {
+    this.benefitId = Number(this.route.snapshot.paramMap.get('id'));
+    if (this.benefitId) {
       this.isEditMode = true;
-      this.loadBeneficio();
+      this.loadBenefit();
     }
   }
 
@@ -42,12 +45,12 @@ export class BeneficioFormComponent implements OnInit {
     });
   }
 
-  loadBeneficio(): void {
-    if (this.beneficioId) {
+  loadBenefit(): void {
+    if (this.benefitId) {
       this.loading = true;
-      this.beneficioService.getById(this.beneficioId).subscribe({
-        next: (beneficio) => {
-          this.form.patchValue(beneficio);
+      this.benefitService.getById(this.benefitId).subscribe({
+        next: (benefit) => {
+          this.form.patchValue(benefit);
           this.loading = false;
         },
         error: (error) => {
@@ -65,14 +68,25 @@ export class BeneficioFormComponent implements OnInit {
       
       const request = this.form.value;
       
-      const observable = this.isEditMode && this.beneficioId
-        ? this.beneficioService.update(this.beneficioId, request)
-        : this.beneficioService.create(request);
+      const observable = this.isEditMode && this.benefitId
+        ? this.benefitService.update(this.benefitId, request)
+        : this.benefitService.create(request);
 
       observable.subscribe({
         next: () => {
-          alert(`Benefício ${this.isEditMode ? 'atualizado' : 'criado'} com sucesso!`);
-          this.router.navigate(['/beneficios']);
+          const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            width: '400px',
+            data: {
+              title: 'Sucesso',
+              message: `Benefício ${this.isEditMode ? 'atualizado' : 'criado'} com sucesso!`,
+              confirmText: 'OK',
+              cancelText: ''
+            }
+          });
+
+          dialogRef.afterClosed().subscribe(() => {
+            this.router.navigate(['/beneficios']);
+          });
         },
         error: (error) => {
           this.errorMessage = error.message;

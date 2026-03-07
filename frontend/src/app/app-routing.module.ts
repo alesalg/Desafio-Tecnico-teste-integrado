@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { BeneficioListComponent } from './components/beneficio-list/beneficio-list.component';
-import { BeneficioFormComponent } from './components/beneficio-form/beneficio-form.component';
-import { TransferenciaComponent } from './components/transferencia/transferencia.component';
+import { BenefitListComponent } from './components/benefit-list/benefit-list.component';
+import { BenefitFormComponent } from './components/benefit-form/benefit-form.component';
+import { TransferComponent } from './components/transfer/transfer.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/beneficios', pathMatch: 'full' },
-  { path: 'beneficios', component: BeneficioListComponent },
-  { path: 'beneficios/novo', component: BeneficioFormComponent },
-  { path: 'beneficios/editar/:id', component: BeneficioFormComponent },
-  { path: 'beneficios/transferir', component: TransferenciaComponent },
+  { path: 'beneficios', component: BenefitListComponent },
+  { path: 'beneficios/novo', component: BenefitFormComponent },
+  { path: 'beneficios/editar/:id', component: BenefitFormComponent },
+  { path: 'beneficios/transferir', component: TransferComponent },
   { path: '**', redirectTo: '/beneficios' }
 ];
 

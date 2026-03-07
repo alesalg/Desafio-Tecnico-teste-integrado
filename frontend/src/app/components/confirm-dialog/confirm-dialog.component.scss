@@ -1,0 +1,34 @@
+.dialog-container {
+  padding: 20px;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.dialog-title {
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.dialog-content {
+  margin-bottom: 24px;
+  
+  p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #666;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancel,
+.btn-confirm {
+  min-width: 80px;
+}
