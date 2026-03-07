@@ -41,13 +41,13 @@ class ConcurrencyTest {
         
         Beneficio destino1 = Beneficio.builder()
                 .nome("Destino 1")
-                .valor(new BigDecimal("0.00"))
+                .valor(new BigDecimal("1.00"))
                 .ativo(true)
                 .build();
         
         Beneficio destino2 = Beneficio.builder()
                 .nome("Destino 2")
-                .valor(new BigDecimal("0.00"))
+                .valor(new BigDecimal("1.00"))
                 .ativo(true)
                 .build();
 
@@ -124,7 +124,7 @@ class ConcurrencyTest {
         
         Beneficio destino = Beneficio.builder()
                 .nome("Destino Race")
-                .valor(new BigDecimal("0.00"))
+                .valor(new BigDecimal("1.00"))
                 .ativo(true)
                 .build();
 
