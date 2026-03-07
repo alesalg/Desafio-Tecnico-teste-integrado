@@ -112,7 +112,7 @@ class ConcurrencyTest {
         System.out.println("Saldo origem final: " + origemFinal.getValor());
         System.out.println("Saldo destino1 final: " + destino1Final.getValor());
         System.out.println("Saldo destino2 final: " + destino2Final.getValor());
-        System.out.println("Soma total: " + somaDestinos);
+        System.out.println("Soma total: " + somaTotal);
     }
 
     @Test
