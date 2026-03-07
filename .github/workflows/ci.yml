@@ -12,5 +12,5 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build backend
-        run: mvn -B -f backend-module clean package
+      - name: Build all modules
+        run: mvn -B clean package
