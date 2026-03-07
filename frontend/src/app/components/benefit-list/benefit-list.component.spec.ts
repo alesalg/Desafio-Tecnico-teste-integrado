@@ -1,29 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { BeneficioListComponent } from './beneficio-list.component';
-import { BeneficioService } from '../../services/beneficio.service';
-import { Beneficio } from '../../models/beneficio.model';
+import { BenefitListComponent } from './benefit-list.component';
+import { BenefitService } from '../../services/benefit.service';
+import { Benefit } from '../../models/benefit.model';
 
-describe('BeneficioListComponent', () => {
-  let component: BeneficioListComponent;
-  let fixture: ComponentFixture<BeneficioListComponent>;
-  let mockBeneficioService: jasmine.SpyObj<BeneficioService>;
+describe('BenefitListComponent', () => {
+  let component: BenefitListComponent;
+  let fixture: ComponentFixture<BenefitListComponent>;
+  let mockBenefitService: jasmine.SpyObj<BenefitService>;
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    mockBeneficioService = jasmine.createSpyObj('BeneficioService', ['getAll', 'getAllAtivos', 'delete']);
+    mockBenefitService = jasmine.createSpyObj('BenefitService', ['getAll', 'getAllActive', 'delete']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      declarations: [BeneficioListComponent],
+      declarations: [BenefitListComponent],
       providers: [
-        { provide: BeneficioService, useValue: mockBeneficioService },
+        { provide: BenefitService, useValue: mockBenefitService },
         { provide: Router, useValue: mockRouter }
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BeneficioListComponent);
+    fixture = TestBed.createComponent(BenefitListComponent);
     component = fixture.componentInstance;
   });
 
@@ -32,36 +32,36 @@ describe('BeneficioListComponent', () => {
   });
 
   it('should load all beneficios on init', () => {
-    const mockBeneficios: Beneficio[] = [
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 },
       { id: 2, nome: 'Beneficio 2', descricao: 'Desc 2', valor: 200, ativo: false, version: 1 }
     ];
 
-    mockBeneficioService.getAll.and.returnValue(of(mockBeneficios));
+    mockBenefitService.getAll.and.returnValue(of(mockBenefits));
 
     fixture.detectChanges();
 
-    expect(mockBeneficioService.getAll).toHaveBeenCalled();
-    expect(component.beneficios).toEqual(mockBeneficios);
+    expect(mockBenefitService.getAll).toHaveBeenCalled();
+    expect(component.benefits).toEqual(mockBenefits);
     expect(component.loading).toBe(false);
   });
 
   it('should load only active beneficios when toggle is on', () => {
-    const mockBeneficios: Beneficio[] = [
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAllAtivos.and.returnValue(of(mockBeneficios));
+    mockBenefitService.getAllActive.and.returnValue(of(mockBenefits));
 
     component.showApenasAtivos = true;
-    component.loadBeneficios();
+    component.loadBenefits();
 
-    expect(mockBeneficioService.getAllAtivos).toHaveBeenCalled();
-    expect(component.beneficios).toEqual(mockBeneficios);
+    expect(mockBenefitService.getAllActive).toHaveBeenCalled();
+    expect(component.benefits).toEqual(mockBenefits);
   });
 
   it('should handle error when loading beneficios', () => {
-    mockBeneficioService.getAll.and.returnValue(throwError(() => new Error('Erro ao carregar')));
+    mockBenefitService.getAll.and.returnValue(throwError(() => new Error('Erro ao carregar')));
 
     fixture.detectChanges();
 
@@ -70,27 +70,27 @@ describe('BeneficioListComponent', () => {
   });
 
   it('should toggle between all and active beneficios', () => {
-    const allBeneficios: Beneficio[] = [
+    const allBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 },
       { id: 2, nome: 'Beneficio 2', descricao: 'Desc 2', valor: 200, ativo: false, version: 1 }
     ];
 
-    const activeBeneficios: Beneficio[] = [
+    const activeBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAll.and.returnValue(of(allBeneficios));
-    mockBeneficioService.getAllAtivos.and.returnValue(of(activeBeneficios));
+    mockBenefitService.getAll.and.returnValue(of(allBenefits));
+    mockBenefitService.getAllActive.and.returnValue(of(activeBenefits));
 
     fixture.detectChanges();
 
     expect(component.showApenasAtivos).toBe(false);
-    expect(component.beneficios.length).toBe(2);
+    expect(component.benefits.length).toBe(2);
 
     component.toggleApenasAtivos();
 
     expect(component.showApenasAtivos).toBe(true);
-    expect(mockBeneficioService.getAllAtivos).toHaveBeenCalled();
+    expect(mockBenefitService.getAllActive).toHaveBeenCalled();
   });
 
   it('should navigate to create form', () => {
@@ -104,17 +104,17 @@ describe('BeneficioListComponent', () => {
   });
 
   it('should navigate to transfer page', () => {
-    component.transferir();
+    component.transfer();
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios/transferir']);
   });
 
   it('should delete beneficio after confirmation', () => {
-    const mockBeneficios: Beneficio[] = [
+    const mockBenefits: Benefit[] = [
       { id: 1, nome: 'Beneficio 1', descricao: 'Desc 1', valor: 100, ativo: true, version: 1 }
     ];
 
-    mockBeneficioService.getAll.and.returnValue(of(mockBeneficios));
-    mockBeneficioService.delete.and.returnValue(of(undefined));
+    mockBenefitService.getAll.and.returnValue(of(mockBenefits));
+    mockBenefitService.delete.and.returnValue(of(undefined));
     spyOn(window, 'confirm').and.returnValue(true);
     spyOn(window, 'alert');
 
@@ -123,7 +123,7 @@ describe('BeneficioListComponent', () => {
     component.deletar(1, 'Beneficio 1');
 
     expect(window.confirm).toHaveBeenCalledWith('Tem certeza que deseja deletar o benefício "Beneficio 1"?');
-    expect(mockBeneficioService.delete).toHaveBeenCalledWith(1);
+    expect(mockBenefitService.delete).toHaveBeenCalledWith(1);
     expect(window.alert).toHaveBeenCalledWith('Benefício deletado com sucesso!');
   });
 
@@ -132,11 +132,11 @@ describe('BeneficioListComponent', () => {
 
     component.deletar(1, 'Beneficio 1');
 
-    expect(mockBeneficioService.delete).not.toHaveBeenCalled();
+    expect(mockBenefitService.delete).not.toHaveBeenCalled();
   });
 
   it('should handle error when deleting', () => {
-    mockBeneficioService.delete.and.returnValue(throwError(() => new Error('Erro ao deletar')));
+    mockBenefitService.delete.and.returnValue(throwError(() => new Error('Erro ao deletar')));
     spyOn(window, 'confirm').and.returnValue(true);
     spyOn(window, 'alert');
 
@@ -151,7 +151,7 @@ describe('BeneficioListComponent', () => {
   });
 
   it('should initialize with correct default values', () => {
-    expect(component.beneficios).toEqual([]);
+    expect(component.benefits).toEqual([]);
     expect(component.loading).toBe(false);
     expect(component.errorMessage).toBe('');
     expect(component.showApenasAtivos).toBe(false);

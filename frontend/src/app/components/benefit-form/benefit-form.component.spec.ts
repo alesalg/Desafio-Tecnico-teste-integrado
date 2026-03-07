@@ -2,19 +2,19 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { BeneficioFormComponent } from './beneficio-form.component';
-import { BeneficioService } from '../../services/beneficio.service';
-import { Beneficio } from '../../models/beneficio.model';
+import { BenefitFormComponent } from './benefit-form.component';
+import { BenefitService } from '../../services/benefit.service';
+import { Benefit } from '../../models/benefit.model';
 
-describe('BeneficioFormComponent', () => {
-  let component: BeneficioFormComponent;
-  let fixture: ComponentFixture<BeneficioFormComponent>;
-  let mockBeneficioService: jasmine.SpyObj<BeneficioService>;
+describe('BenefitFormComponent', () => {
+  let component: BenefitFormComponent;
+  let fixture: ComponentFixture<BenefitFormComponent>;
+  let mockBenefitService: jasmine.SpyObj<BenefitService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockActivatedRoute: any;
 
   beforeEach(async () => {
-    mockBeneficioService = jasmine.createSpyObj('BeneficioService', ['getById', 'create', 'update']);
+    mockBenefitService = jasmine.createSpyObj('BenefitService', ['getById', 'create', 'update']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockActivatedRoute = {
       snapshot: {
@@ -25,16 +25,16 @@ describe('BeneficioFormComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      declarations: [BeneficioFormComponent],
+      declarations: [BenefitFormComponent],
       imports: [ReactiveFormsModule],
       providers: [
-        { provide: BeneficioService, useValue: mockBeneficioService },
+        { provide: BenefitService, useValue: mockBenefitService },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BeneficioFormComponent);
+    fixture = TestBed.createComponent(BenefitFormComponent);
     component = fixture.componentInstance;
   });
 
@@ -78,7 +78,7 @@ describe('BeneficioFormComponent', () => {
   });
 
   it('should load beneficio in edit mode', () => {
-    const mockBeneficio: Beneficio = {
+    const mockBenefit: Benefit = {
       id: 1,
       nome: 'Beneficio 1',
       descricao: 'Desc 1',
@@ -88,20 +88,20 @@ describe('BeneficioFormComponent', () => {
     };
 
     mockActivatedRoute.snapshot.paramMap.get.and.returnValue('1');
-    mockBeneficioService.getById.and.returnValue(of(mockBeneficio));
+    mockBenefitService.getById.and.returnValue(of(mockBenefit));
 
     fixture.detectChanges();
 
     expect(component.isEditMode).toBe(true);
-    expect(component.beneficioId).toBe(1);
-    expect(mockBeneficioService.getById).toHaveBeenCalledWith(1);
+    expect(component.benefitId).toBe(1);
+    expect(mockBenefitService.getById).toHaveBeenCalledWith(1);
     expect(component.form.get('nome')?.value).toBe('Beneficio 1');
     expect(component.form.get('valor')?.value).toBe(100);
   });
 
   it('should handle error when loading beneficio', () => {
     mockActivatedRoute.snapshot.paramMap.get.and.returnValue('1');
-    mockBeneficioService.getById.and.returnValue(throwError(() => new Error('Erro ao carregar')));
+    mockBenefitService.getById.and.returnValue(throwError(() => new Error('Erro ao carregar')));
 
     fixture.detectChanges();
 
@@ -110,7 +110,7 @@ describe('BeneficioFormComponent', () => {
   });
 
   it('should create new beneficio', () => {
-    const mockResponse: Beneficio = {
+    const mockResponse: Benefit = {
       id: 1,
       nome: 'Novo Beneficio',
       descricao: 'Nova Desc',
@@ -119,7 +119,7 @@ describe('BeneficioFormComponent', () => {
       version: 1
     };
 
-    mockBeneficioService.create.and.returnValue(of(mockResponse));
+    mockBenefitService.create.and.returnValue(of(mockResponse));
     spyOn(window, 'alert');
 
     fixture.detectChanges();
@@ -133,13 +133,13 @@ describe('BeneficioFormComponent', () => {
 
     component.onSubmit();
 
-    expect(mockBeneficioService.create).toHaveBeenCalled();
+    expect(mockBenefitService.create).toHaveBeenCalled();
     expect(window.alert).toHaveBeenCalledWith('Benefício criado com sucesso!');
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios']);
   });
 
   it('should update existing beneficio', () => {
-    const mockResponse: Beneficio = {
+    const mockResponse: Benefit = {
       id: 1,
       nome: 'Beneficio Atualizado',
       descricao: 'Desc Atualizada',
@@ -148,13 +148,13 @@ describe('BeneficioFormComponent', () => {
       version: 2
     };
 
-    mockBeneficioService.update.and.returnValue(of(mockResponse));
+    mockBenefitService.update.and.returnValue(of(mockResponse));
     spyOn(window, 'alert');
 
     fixture.detectChanges();
 
     component.isEditMode = true;
-    component.beneficioId = 1;
+    component.benefitId = 1;
 
     component.form.patchValue({
       nome: 'Beneficio Atualizado',
@@ -165,7 +165,7 @@ describe('BeneficioFormComponent', () => {
 
     component.onSubmit();
 
-    expect(mockBeneficioService.update).toHaveBeenCalledWith(1, jasmine.any(Object));
+    expect(mockBenefitService.update).toHaveBeenCalledWith(1, jasmine.any(Object));
     expect(window.alert).toHaveBeenCalledWith('Benefício atualizado com sucesso!');
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/beneficios']);
   });
@@ -175,12 +175,12 @@ describe('BeneficioFormComponent', () => {
 
     component.onSubmit();
 
-    expect(mockBeneficioService.create).not.toHaveBeenCalled();
-    expect(mockBeneficioService.update).not.toHaveBeenCalled();
+    expect(mockBenefitService.create).not.toHaveBeenCalled();
+    expect(mockBenefitService.update).not.toHaveBeenCalled();
   });
 
   it('should handle error on submit', () => {
-    mockBeneficioService.create.and.returnValue(throwError(() => new Error('Erro ao salvar')));
+    mockBenefitService.create.and.returnValue(throwError(() => new Error('Erro ao salvar')));
 
     fixture.detectChanges();
 

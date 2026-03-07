@@ -27,15 +27,15 @@
           (change)="onFromChange()"
         >
           <option value="">Selecione o beneficio de origem</option>
-          <option *ngFor="let beneficio of beneficios" [value]="beneficio.id">
-            {{ beneficio.nome }} - {{ formatarValor(beneficio.valor) }}
+          <option *ngFor="let benefit of benefits" [value]="benefit.id">
+            {{ benefit.nome }} - {{ formatValue(benefit.valor) }}
           </option>
         </select>
       </div>
 
-      <div *ngIf="fromBeneficio" class="info-card">
+      <div *ngIf="fromBenefit" class="info-card">
         <div class="info-label">Saldo disponivel</div>
-        <div class="info-value">{{ formatarValor(fromBeneficio.valor) }}</div>
+        <div class="info-value">{{ formatValue(fromBenefit.valor) }}</div>
       </div>
 
       <!-- Arrow -->
@@ -53,19 +53,19 @@
           (change)="onToChange()"
         >
           <option value="">Selecione o beneficio de destino</option>
-          <option *ngFor="let beneficio of beneficios" [value]="beneficio.id">
-            {{ beneficio.nome }} - {{ formatarValor(beneficio.valor) }}
+          <option *ngFor="let benefit of benefits" [value]="benefit.id">
+            {{ benefit.nome }} - {{ formatValue(benefit.valor) }}
           </option>
         </select>
       </div>
 
-      <div *ngIf="toBeneficio" class="info-card">
+      <div *ngIf="toBenefit" class="info-card">
         <div class="info-label">Saldo atual</div>
-        <div class="info-value">{{ formatarValor(toBeneficio.valor) }}</div>
+        <div class="info-value">{{ formatValue(toBenefit.valor) }}</div>
       </div>
 
       <!-- Alerta IDs iguais -->
-      <div *ngIf="idsIguais()" class="alert alert-warning">
+      <div *ngIf="sameIds()" class="alert alert-warning">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Origem e destino nao podem ser iguais!
       </div>
@@ -87,35 +87,35 @@
         </div>
       </div>
 
-      <div *ngIf="valorExcedeSaldo()" class="alert alert-warning">
+      <div *ngIf="valueExceedsBalance()" class="alert alert-warning">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Valor excede o saldo disponivel!
       </div>
 
       <!-- Resumo -->
-      <div *ngIf="fromBeneficio && toBeneficio && form.get('valor')?.value" class="resumo-card">
+      <div *ngIf="fromBenefit && toBenefit && form.get('valor')?.value" class="resumo-card">
         <h3 class="resumo-title">Resumo</h3>
         <div class="resumo-rows">
           <div class="resumo-row">
             <span>De</span>
-            <strong>{{ fromBeneficio.nome }}</strong>
+            <strong>{{ fromBenefit.nome }}</strong>
           </div>
           <div class="resumo-row">
             <span>Para</span>
-            <strong>{{ toBeneficio.nome }}</strong>
+            <strong>{{ toBenefit.nome }}</strong>
           </div>
           <div class="resumo-row resumo-highlight">
             <span>Valor</span>
-            <strong>{{ formatarValor(form.get('valor')?.value) }}</strong>
+            <strong>{{ formatValue(form.get('valor')?.value) }}</strong>
           </div>
           <div class="resumo-divider"></div>
           <div class="resumo-row">
             <span>Novo saldo origem</span>
-            <strong>{{ formatarValor(fromBeneficio.valor - form.get('valor')?.value) }}</strong>
+            <strong>{{ formatValue(fromBenefit.valor - form.get('valor')?.value) }}</strong>
           </div>
           <div class="resumo-row">
             <span>Novo saldo destino</span>
-            <strong>{{ formatarValor(toBeneficio.valor + form.get('valor')?.value) }}</strong>
+            <strong>{{ formatValue(toBenefit.valor + form.get('valor')?.value) }}</strong>
           </div>
         </div>
       </div>
@@ -133,7 +133,7 @@
         <button
           type="submit"
           class="btn btn-success"
-          [disabled]="!form.valid || loading || idsIguais() || valorExcedeSaldo()"
+          [disabled]="!form.valid || loading || sameIds() || valueExceedsBalance()"
         >
           <div *ngIf="loading" class="spinner-sm"></div>
           {{ loading ? 'Transferindo...' : 'Confirmar Transferencia' }}

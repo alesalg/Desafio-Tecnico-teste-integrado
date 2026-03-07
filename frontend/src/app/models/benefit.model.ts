@@ -1,4 +1,4 @@
-export interface Beneficio {
+export interface Benefit {
   id: number;
   nome: string;
   descricao: string;
@@ -7,20 +7,20 @@ export interface Beneficio {
   version: number;
 }
 
-export interface BeneficioRequest {
+export interface BenefitRequest {
   nome: string;
   descricao: string;
   valor: number;
   ativo: boolean;
 }
 
-export interface TransferenciaRequest {
+export interface TransferRequest {
   fromId: number;
   toId: number;
   valor: number;
 }
 
-export interface TransferenciaResponse {
+export interface TransferResponse {
   fromId: number;
   fromNome: string;
   fromNovoSaldo: number;
